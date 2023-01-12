@@ -1,18 +1,11 @@
-#include <Keyboard.h>
-#include <KeyboardLayout.h>
-#include <Keyboard_da_DK.h>
-#include <Keyboard_de_DE.h>
-#include <Keyboard_es_ES.h>
-#include <Keyboard_fr_FR.h>
-#include <Keyboard_it_IT.h>
-#include <Keyboard_sv_SE.h>
+//TODO: FINISH THE PROJECT
+//TODO: make code readable
 
 //Using the ezButton library to help handle button I/O
 //Using Simpit to handle interacting with Kerbal Space Program
 
 #include <KerbalSimpit.h>
 #include <ezButton.h>
-
 
 int abortSafety = LOW;
 int stageSafety = LOW;
@@ -60,21 +53,27 @@ const int PITCH_PIN = A11;
 const int ROLL_PIN = A12;
 const int YAW_PIN = A13;
 
+//THIS BLOCK IS FOR DEBUGGING ONLY
+// USE THESE TO SEE CAMERA AXIS READOUTS ON THE INGAME PITCH, ROLL, YAW
+// const int PITCH_PIN = A9;
+// const int ROLL_PIN = A10;
+// const int YAW_PIN = A8;
+
 
 // //CAMERA JOYSTICK CONTROL PINS
 const int CAM_PITCH_PIN = A9;
 const int CAM_ROLL_PIN = A10;
 const int CAM_YAW_PIN = A8;
-// int16_t camPitch;
-// int16_t camRoll;
-// int16_t camYaw;
+int16_t camPitch;
+int16_t camRoll;
+int16_t camYaw;
 
-// const int deadRangeLowPitch = 505;
-// const int deadRangeHighPitch = 525;
-// const int deadRangeLowRoll = 505;
-// const int deadRangeHighRoll = 525;
-// const int deadRangeLowYaw = 505;
-// const int deadRangeHighYaw = 525;
+const int deadRangeLowPitch = 505;
+const int deadRangeHighPitch = 900;
+const int deadRangeLowRoll = 505;
+const int deadRangeHighRoll = 900;
+const int deadRangeLowYaw = 505;
+const int deadRangeHighYaw = 900;
 
 //DEBOUNCE TIMES
 unsigned long lastDebounceTime = 0;
@@ -128,9 +127,6 @@ void setup() {
   digitalWrite(LED_BUILTIN, LOW);
 
   mySimpit.printToKSP("Connected", PRINT_TO_SCREEN);
-  // mySimpit.inboundHandler(messageHandler);
-  // mySimpit.registerChannel(ALTITUDE_MESSAGE);
-  // mySimpit.registerChannel(AIRSPEED_MESSAGE);
 }
 
 void loop() {
@@ -229,11 +225,14 @@ void loop() {
 
   if(ESC_PIN.isPressed()) {
     mySimpit.printToKSP("ESC MENU OPEN");
-    // keyboardEmulatorMessage keyMsg();
+    keyboardEmulatorMessage keyMsg(0x1B);
+    mySimpit.send(KEYBOARD_EMULATOR, keyMsg);
   }
 
   if(ESC_PIN.isReleased()) {
     mySimpit.printToKSP("ESC MENU CLOSE");
+    keyboardEmulatorMessage keyMsg(0x1B);
+    mySimpit.send(KEYBOARD_EMULATOR, keyMsg);
   }
 
   if (ABORTSAFETY_PIN.isPressed()) {
@@ -354,61 +353,61 @@ void loop() {
 
 
 
-//   // //CAMERA JOYSTICK CONTROL
-//   cameraRotationMessage camRot_msg;
-//   // Read the values of the potentiometers
-//   int cam_reading_pitch = analogRead(CAM_PITCH_PIN);
-//   int cam_reading_roll = analogRead(CAM_ROLL_PIN);
-//   int cam_reading_yaw = analogRead(CAM_YAW_PIN);
-//   // Check if they are in the deadzone, if not, set the values to a KSP Figure
-//     // Pitch
-//   if (cam_reading_pitch < deadRangeLowPitch) {
-//    camPitch = map(cam_reading_pitch, 0, deadRangeLowPitch, INT16_MIN, 0);
-//   } else if (cam_reading_pitch > deadRangeHighPitch) {
-//     camPitch = map(cam_reading_pitch, deadRangeHighPitch , 1023, 0, INT16_MAX);
-//   } else {
-//     camPitch = 0;
-//   }
-//     // Roll
-//   if (cam_reading_roll < deadRangeLowRoll) {
-//     camRoll = map(cam_reading_roll, 0, deadRangeLowRoll, INT16_MIN, 0);
-//   } else if (cam_reading_roll > deadRangeHighRoll) {
-//     camRoll = map(cam_reading_roll, deadRangeHighRoll , 1023, 0, INT16_MAX);
-//   } else {
-//     camRoll = 0;
-//   }
-//     // Yaw
-//   if (cam_reading_yaw < deadRangeLowYaw) {
-//     camYaw = map(cam_reading_yaw, 0, deadRangeLowYaw, INT16_MIN, 0);
-//   } else if (cam_reading_yaw > deadRangeHighYaw) {
-//     camYaw = map(cam_reading_yaw, deadRangeHighYaw , 1023, 0, INT16_MAX);
-//   } else {
-//     camYaw = 0;
-//   }
-// // Put those values in the message
-//  camRot_msg.setPitch(camPitch);
-//  camRot_msg.setRoll(camRoll);
-//  camRot_msg.setYaw(camYaw);
-//   // Send the message
-//   mySimpit.send(CAMERA_ROTATION_MESSAGE, camRot_msg);
-// }
-    cameraRotationMessage camRot_msg;
-
-    int camReading_pitch = analogRead(CAM_PITCH_PIN);
-    int camReading_roll = analogRead(CAM_ROLL_PIN);
-    int camReading_yaw = analogRead(CAM_YAW_PIN);
-
-    int16_t camPitch = map(camReading_pitch, 0, 1023, INT16_MIN, INT16_MAX);
-    int16_t camRoll = map(camReading_roll, 1023, 0, INT16_MIN, INT16_MAX);
-    int16_t camYaw = map(camReading_yaw, 0, 1023, INT16_MIN, INT16_MAX);
-    // Put those values in the message
-    camRot_msg.setPitch(camPitch);
-    camRot_msg.setRoll(camRoll);
-    camRot_msg.setYaw(camYaw);
-    // Send the message
-    mySimpit.send(CAMERA_ROTATION_MESSAGE, camRot_msg);
-
+  // //CAMERA JOYSTICK CONTROL
+  cameraRotationMessage camRot_msg;
+  // Read the values of the potentiometers
+  int cam_reading_pitch = analogRead(CAM_PITCH_PIN);
+  int cam_reading_roll = analogRead(CAM_ROLL_PIN);
+  int cam_reading_yaw = analogRead(CAM_YAW_PIN);
+  // Check if they are in the deadzone, if not, set the values to a KSP Figure
+    // Pitch
+  if (cam_reading_pitch < deadRangeLowPitch) {
+   camPitch = map(cam_reading_pitch, 0, deadRangeLowPitch, INT16_MIN, 0);
+  } else if (cam_reading_pitch > deadRangeHighPitch) {
+    camPitch = map(cam_reading_pitch, deadRangeHighPitch , 1023, 0, INT16_MAX);
+  } else {
+    camPitch = 0;
+  }
+    // Roll
+  if (cam_reading_roll < deadRangeLowRoll) {
+    camRoll = map(cam_reading_roll, 0, deadRangeLowRoll, INT16_MIN, 0);
+  } else if (cam_reading_roll > deadRangeHighRoll) {
+    camRoll = map(cam_reading_roll, deadRangeHighRoll , 1023, 0, INT16_MAX);
+  } else {
+    camRoll = 0;
+  }
+    // Yaw
+  if (cam_reading_yaw < deadRangeLowYaw) {
+    camYaw = map(cam_reading_yaw, 0, deadRangeLowYaw, INT16_MIN, 0);
+  } else if (cam_reading_yaw > deadRangeHighYaw) {
+    camYaw = map(cam_reading_yaw, deadRangeHighYaw , 1023, 0, INT16_MAX);
+  } else {
+    camYaw = 0;
+  }
+// Put those values in the message
+ camRot_msg.setPitch(camPitch);
+ camRot_msg.setRoll(camRoll);
+ camRot_msg.setYaw(camYaw);
+  // Send the message
+  mySimpit.send(CAMERA_ROTATION_MESSAGE, camRot_msg);
 }
+//     cameraRotationMessage camRot_msg;
+
+//     int camReading_pitch = analogRead(CAM_PITCH_PIN);
+//     int camReading_roll = analogRead(CAM_ROLL_PIN);
+//     int camReading_yaw = analogRead(CAM_YAW_PIN);
+
+//     int16_t camPitch = map(camReading_pitch, 0, 1023, INT16_MIN, INT16_MAX);
+//     int16_t camRoll = map(camReading_roll, 1023, 0, INT16_MIN, INT16_MAX);
+//     int16_t camYaw = map(camReading_yaw, 0, 1023, INT16_MIN, INT16_MAX);
+//     // Put those values in the message
+//     camRot_msg.setPitch(camPitch);
+//     camRot_msg.setRoll(camRoll);
+//     camRot_msg.setYaw(camYaw);
+//     // Send the message
+//     mySimpit.send(CAMERA_ROTATION_MESSAGE, camRot_msg);
+
+// }
 
 // void messageHandler(byte messageType, byte msg[], byte msgSize) {
 //   switch(messageType) {

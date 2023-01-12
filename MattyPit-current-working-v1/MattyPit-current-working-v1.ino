@@ -69,11 +69,11 @@ int16_t camRoll;
 int16_t camYaw;
 
 const int deadRangeLowPitch = 505;
-const int deadRangeHighPitch = 900;
+const int deadRangeHighPitch = 525;
 const int deadRangeLowRoll = 505;
-const int deadRangeHighRoll = 900;
+const int deadRangeHighRoll = 525;
 const int deadRangeLowYaw = 505;
-const int deadRangeHighYaw = 900;
+const int deadRangeHighYaw = 525;
 
 //DEBOUNCE TIMES
 unsigned long lastDebounceTime = 0;

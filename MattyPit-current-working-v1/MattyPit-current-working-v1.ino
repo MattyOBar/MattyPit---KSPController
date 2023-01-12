@@ -391,6 +391,11 @@ void loop() {
   // Send the message
   mySimpit.send(CAMERA_ROTATION_MESSAGE, camRot_msg);
 }
+
+
+
+//code to try to control the camera more similar to the flight joystick
+
 //     cameraRotationMessage camRot_msg;
 
 //     int camReading_pitch = analogRead(CAM_PITCH_PIN);
@@ -407,31 +412,4 @@ void loop() {
 //     // Send the message
 //     mySimpit.send(CAMERA_ROTATION_MESSAGE, camRot_msg);
 
-// }
-
-// void messageHandler(byte messageType, byte msg[], byte msgSize) {
-//   switch(messageType) {
-    
-//   case ALTITUDE_MESSAGE:
-//     if (msgSize == sizeof(altitudeMessage)) {
-//       altitudeMessage myAltitude;
-//       myAltitude = parseMessage<altitudeMessage>(msg);
-//       // further processing of altitude data in myAltitude here
-
-//       lcd.setCursor(0,0);
-//       lcd.print(myAltitude.surface);
-//     };
-
-//    case AIRSPEED_MESSAGE:
-//     if (msgSize == sizeof(airspeedMessage)) {
-//       airspeedMessage myAirspeed;
-//       myAirspeed = parseMessage<airspeedMessage>(msg);
-//       // further processing of altitude data in myAltitude here
-
-//       lcd.setCursor(0,1);
-//       lcd.print(myAirspeed.IAS);
-//     };
-    
-//     break;
-//   }
 // }

@@ -126,6 +126,7 @@ void loop() {
 
   mySimpit.update();
 
+  //Initialize buttons
   MAP_PIN.loop();
   GEAR_PIN.loop();
   BRAKES_PIN.loop();
@@ -142,20 +143,6 @@ void loop() {
   CAG5_PIN.loop();
   CAG6_PIN.loop();
 
-
-
-
-
-  //   if(RCS_PIN.isPressed()){
-  //     mySimpit.printToKSP("Activate RCS!");
-  //     mySimpit.activateAction(RCS_ACTION);
-  //     digitalWrite(RCS_LED, HIGH);
-  //   }
-  //   if(RCS_PIN.isReleased()){
-  //     mySimpit.printToKSP("Deactivate RCS!");
-  //     mySimpit.deactivateAction(RCS_ACTION);
-  //     digitalWrite(RCS_LED, LOW);
-  //   }
   if(CAG3_PIN.isPressed()) {
     mySimpit.printToKSP("CAG3 PRESSED");
     mySimpit.activateCAG(3);
@@ -287,7 +274,6 @@ void loop() {
     digitalWrite(RED_BRAKES_LED, LOW);
     digitalWrite(GREEN_BRAKES_LED, HIGH);
     digitalWrite(BLUE_BRAKES_LED, LOW);
-
   }
 
   if(LIGHTS_PIN.isPressed()){
@@ -324,8 +310,6 @@ void loop() {
   throttle_msg.throttle = map(throttleReading, 0, 1023, 0, INT16_MAX);
   mySimpit.send(THROTTLE_MESSAGE, throttle_msg);
 
-
-
   //FLIGHT JOYSTICK CONTROL
   rotationMessage rot_msg;
 
@@ -346,8 +330,6 @@ void loop() {
 
   // Send the message
   mySimpit.send(ROTATION_MESSAGE, rot_msg);
-
-
 
   //CAMERA JOYSTICK CONTROL
   cameraRotationMessage camRot_msg;

@@ -1,2 +1,2 @@
 # MattyPit---KSPController
-My Controller for KSP using the SimPit library.
+My Controller for Kerbal Space Program using the SimPit library.

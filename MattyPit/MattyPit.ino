@@ -13,6 +13,7 @@ ezButton ESC_PIN(43);
 ezButton ABORTSAFETY_PIN(47);
 ezButton ABORT_PIN(49);
 ezButton STAGESAFETY_PIN(38);
+
 ezButton STAGE_PIN(3);
 
 //PUSHBUTTON SWITCH PINS
@@ -28,13 +29,11 @@ ezButton CAG6_PIN(12);
 const int MAP_LED = 44;
 const int RED_GEAR_LED = 28;
 const int GREEN_GEAR_LED = 29;
-const int BLUE_GEAR_LED = 30;
+
 const int RED_BRAKES_LED = 25;
 const int GREEN_BRAKES_LED = 26;
-const int BLUE_BRAKES_LED = 27;
 const int RED_LIGHTS_LED = 22;
 const int GREEN_LIGHTS_LED = 23;
-const int BLUE_LIGHTS_LED = 24;
 const int CAG3_LED = 8;
 const int CAG4_LED = 7;
 const int CAG5_LED = 9;
@@ -60,10 +59,10 @@ int16_t camYaw;
 
 const int deadRangeLowPitch = 400;
 const int deadRangeHighPitch = 650;
-const int deadRangeLowRoll = 475;
-const int deadRangeHighRoll = 550;
-const int deadRangeLowYaw = 475;
-const int deadRangeHighYaw = 525;
+const int deadRangeLowRoll = 425;
+const int deadRangeHighRoll = 575;
+const int deadRangeLowYaw = 375;
+const int deadRangeHighYaw = 625;
 
 //VARIABLES
 int abortSafety = LOW;
@@ -83,13 +82,10 @@ void setup() {
   pinMode(MAP_LED, OUTPUT);
   pinMode(RED_GEAR_LED, OUTPUT);
   pinMode(GREEN_GEAR_LED, OUTPUT);
-  pinMode(BLUE_GEAR_LED, OUTPUT);
   pinMode(RED_BRAKES_LED, OUTPUT);
   pinMode(GREEN_BRAKES_LED, OUTPUT);
-  pinMode(BLUE_BRAKES_LED, OUTPUT);
   pinMode(RED_LIGHTS_LED, OUTPUT);
   pinMode(GREEN_LIGHTS_LED, OUTPUT);
-  pinMode(BLUE_LIGHTS_LED, OUTPUT);
   pinMode(CAG3_LED, OUTPUT);
   pinMode(CAG4_LED, OUTPUT);
   pinMode(CAG5_LED, OUTPUT);
@@ -250,7 +246,6 @@ void loop() {
     mySimpit.deactivateAction(GEAR_ACTION);
     digitalWrite(RED_GEAR_LED, HIGH);
     digitalWrite(GREEN_GEAR_LED, LOW);
-    digitalWrite(BLUE_GEAR_LED, LOW);
   }
 
   if(GEAR_PIN.isReleased()){
@@ -258,7 +253,6 @@ void loop() {
     mySimpit.activateAction(GEAR_ACTION);
     digitalWrite(RED_GEAR_LED, LOW);
     digitalWrite(GREEN_GEAR_LED, HIGH);
-    digitalWrite(BLUE_GEAR_LED, LOW);
   }
 
   if(BRAKES_PIN.isPressed()){
@@ -266,14 +260,12 @@ void loop() {
     mySimpit.deactivateAction(BRAKES_ACTION);
     digitalWrite(RED_BRAKES_LED, HIGH);
     digitalWrite(GREEN_BRAKES_LED, LOW);
-    digitalWrite(BLUE_BRAKES_LED, LOW);
   }
   if(BRAKES_PIN.isReleased()){
     mySimpit.printToKSP("Activate Brakes!");
     mySimpit.activateAction(BRAKES_ACTION);
     digitalWrite(RED_BRAKES_LED, LOW);
     digitalWrite(GREEN_BRAKES_LED, HIGH);
-    digitalWrite(BLUE_BRAKES_LED, LOW);
   }
 
   if(LIGHTS_PIN.isPressed()){
@@ -281,14 +273,12 @@ void loop() {
     mySimpit.activateAction(LIGHT_ACTION);
     digitalWrite(RED_LIGHTS_LED, LOW);
     digitalWrite(GREEN_LIGHTS_LED, HIGH);
-    digitalWrite(BLUE_LIGHTS_LED, LOW);
   }
   if(LIGHTS_PIN.isReleased()){
     mySimpit.printToKSP("Deactivate Lights!");
     mySimpit.deactivateAction(LIGHT_ACTION);
     digitalWrite(RED_LIGHTS_LED, HIGH);
     digitalWrite(GREEN_LIGHTS_LED,LOW);
-    digitalWrite(BLUE_LIGHTS_LED, LOW);
   }
 
   if(MAP_PIN.isPressed()) {
@@ -377,6 +367,7 @@ void loop() {
   camRot_msg.setPitch(camPitch);
   camRot_msg.setRoll(camRoll);
   camRot_msg.setYaw(camYaw);
+
   // Send the message
   mySimpit.send(CAMERA_ROTATION_MESSAGE, camRot_msg);
 }

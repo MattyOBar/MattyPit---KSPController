@@ -12,9 +12,10 @@ ezButton LIGHTS_PIN(52);
 ezButton ESC_PIN(43);
 ezButton ABORTSAFETY_PIN(47);
 ezButton ABORT_PIN(49);
-ezButton STAGESAFETY_PIN(38);
-
-ezButton STAGE_PIN(3);
+ezButton CAG1_PIN(2);
+ezButton CAG2_PIN(48);
+ezButton RCS_PIN(45);
+ezButton SAS_PIN(40);
 
 //PUSHBUTTON SWITCH PINS
 ezButton TIMEUP_PIN(53);
@@ -23,21 +24,30 @@ ezButton CAG3_PIN(5);
 ezButton CAG4_PIN(11);
 ezButton CAG5_PIN(4);
 ezButton CAG6_PIN(12);
-
+ezButton STAGE_PIN(24);
+ezButton CAM_VIEW_PIN(27);
+ezButton ZOOM_DOWN_PIN(32);
+ezButton ZOOM_UP_PIN(38);
 
 //LED PINS
 const int MAP_LED = 44;
 const int RED_GEAR_LED = 28;
 const int GREEN_GEAR_LED = 29;
-
 const int RED_BRAKES_LED = 25;
 const int GREEN_BRAKES_LED = 26;
 const int RED_LIGHTS_LED = 22;
 const int GREEN_LIGHTS_LED = 23;
+const int RED_RCS_LED = 36;
+const int GREEN_RCS_LED = 35;
+const int RED_SAS_LED = 34;
+const int GREEN_SAS_LED = 33;
+const int CAG1_LED = 39;
+const int CAG2_LED = 37;
 const int CAG3_LED = 8;
 const int CAG4_LED = 7;
 const int CAG5_LED = 9;
 const int CAG6_LED = 6;
+const int CONNECTION_LED = 30;
 
 //THROTTLE POTENTIOMETER PIN
 const int THROTTLE_PIN = A14;
@@ -46,6 +56,9 @@ const int THROTTLE_PIN = A14;
 const int PITCH_PIN = A11;
 const int ROLL_PIN = A12;
 const int YAW_PIN = A13;
+
+//CAMERA ZOOM POTENTIOMETER PIN
+const int CAM_ZOOM_PIN = A6;
 
 //CAMERA JOYSTICK CONTROL PINS
 const int CAM_PITCH_PIN = A9;
@@ -66,7 +79,6 @@ const int deadRangeHighYaw = 625;
 
 //VARIABLES
 int abortSafety = LOW;
-int stageSafety = LOW;
 
 //DEBOUNCE TIMES
 unsigned long lastDebounceTime = 0;
@@ -86,10 +98,17 @@ void setup() {
   pinMode(GREEN_BRAKES_LED, OUTPUT);
   pinMode(RED_LIGHTS_LED, OUTPUT);
   pinMode(GREEN_LIGHTS_LED, OUTPUT);
+  pinMode(RED_SAS_LED, OUTPUT);
+  pinMode(GREEN_SAS_LED, OUTPUT);
+  pinMode(RED_RCS_LED, OUTPUT);
+  pinMode(GREEN_RCS_LED, OUTPUT);
+  pinMode(CAG1_LED, OUTPUT);
+  pinMode(CAG2_LED, OUTPUT);
   pinMode(CAG3_LED, OUTPUT);
   pinMode(CAG4_LED, OUTPUT);
   pinMode(CAG5_LED, OUTPUT);
   pinMode(CAG6_LED, OUTPUT);
+  pinMode(CONNECTION_LED, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
 
@@ -102,18 +121,26 @@ void setup() {
   ABORTSAFETY_PIN.setDebounceTime(50);
   TIMEUP_PIN.setDebounceTime(50);
   TIMEDOWN_PIN.setDebounceTime(50);
+  RCS_PIN.setDebounceTime(50);
+  SAS_PIN.setDebounceTime(50);
+  CAG1_PIN.setDebounceTime(50);
+  CAG2_PIN.setDebounceTime(50);
   CAG3_PIN.setDebounceTime(50);
   CAG4_PIN.setDebounceTime(50);
   CAG5_PIN.setDebounceTime(50);
   CAG6_PIN.setDebounceTime(50);
   STAGE_PIN.setDebounceTime(50);
-  STAGESAFETY_PIN.setDebounceTime(50);
+  CAM_VIEW_PIN.setDebounceTime(50);
+  ZOOM_UP_PIN.setDebounceTime(50);
+  ZOOM_DOWN_PIN.setDebounceTime(50);
+  
 
   while (!mySimpit.init()) {
     delay(100);
   }
 
   digitalWrite(LED_BUILTIN, LOW);
+
 
   mySimpit.printToKSP("Connected", PRINT_TO_SCREEN);
 }
@@ -133,11 +160,43 @@ void loop() {
   TIMEUP_PIN.loop();
   TIMEDOWN_PIN.loop();
   STAGE_PIN.loop();
-  STAGESAFETY_PIN.loop();
+  SAS_PIN.loop();
+  RCS_PIN.loop();
+  CAG1_PIN.loop();
+  CAG2_PIN.loop();
   CAG3_PIN.loop();
   CAG4_PIN.loop();
   CAG5_PIN.loop();
   CAG6_PIN.loop();
+  CAM_VIEW_PIN.loop();
+  ZOOM_UP_PIN.loop();
+  ZOOM_DOWN_PIN.loop();
+
+  digitalWrite(CONNECTION_LED, HIGH);
+
+  if(CAG1_PIN.isPressed()) {
+    digitalWrite(CAG1_LED, HIGH);
+    mySimpit.printToKSP("CAG1 PRESSED");
+    mySimpit.activateCAG(1);
+  }
+  
+  if(CAG1_PIN.isReleased()) {
+    digitalWrite(CAG1_LED, LOW);
+    mySimpit.printToKSP("CAG1 RELEASED");
+    mySimpit.deactivateCAG(1);
+  }
+
+  if(CAG2_PIN.isPressed()) {
+    digitalWrite(CAG2_LED, HIGH);
+    mySimpit.printToKSP("CAG2 PRESSED");
+    mySimpit.activateCAG(2);
+  }
+  
+  if(CAG2_PIN.isReleased()) {
+    digitalWrite(CAG2_LED, LOW);
+    mySimpit.printToKSP("CAG2 RELEASED");
+    mySimpit.deactivateCAG(2);
+  }
 
   if(CAG3_PIN.isPressed()) {
     mySimpit.printToKSP("CAG3 PRESSED");
@@ -226,55 +285,46 @@ void loop() {
     mySimpit.printToKSP("ABORT ACTIVATE");
   }
 
-  if (STAGESAFETY_PIN.isPressed()) {
-    stageSafety = HIGH;
-    mySimpit.printToKSP("STAGE SWITCH IS HOT");
-  }
-  
-  if (STAGESAFETY_PIN.isReleased()) {
-    stageSafety = LOW;
-    mySimpit.printToKSP("STAGE SWITCH IS COLD");
-  }
-  
   if (STAGE_PIN.isPressed()) {
     mySimpit.activateAction(STAGE_ACTION);
     mySimpit.printToKSP("STAGE ACTIVATE");
   }
 
-  if(GEAR_PIN.isPressed()){
+  if(GEAR_PIN.isPressed()) {
     mySimpit.printToKSP("Deactivate GEAR!");
     mySimpit.deactivateAction(GEAR_ACTION);
     digitalWrite(RED_GEAR_LED, HIGH);
     digitalWrite(GREEN_GEAR_LED, LOW);
   }
 
-  if(GEAR_PIN.isReleased()){
+  if(GEAR_PIN.isReleased()) {
     mySimpit.printToKSP("Activate Gear!");
     mySimpit.activateAction(GEAR_ACTION);
     digitalWrite(RED_GEAR_LED, LOW);
     digitalWrite(GREEN_GEAR_LED, HIGH);
   }
 
-  if(BRAKES_PIN.isPressed()){
+  if(BRAKES_PIN.isReleased()) {
     mySimpit.printToKSP("Deactivate Brakes!");
     mySimpit.deactivateAction(BRAKES_ACTION);
     digitalWrite(RED_BRAKES_LED, HIGH);
     digitalWrite(GREEN_BRAKES_LED, LOW);
   }
-  if(BRAKES_PIN.isReleased()){
+
+  if(BRAKES_PIN.isPressed()) {
     mySimpit.printToKSP("Activate Brakes!");
     mySimpit.activateAction(BRAKES_ACTION);
     digitalWrite(RED_BRAKES_LED, LOW);
     digitalWrite(GREEN_BRAKES_LED, HIGH);
   }
 
-  if(LIGHTS_PIN.isPressed()){
+  if(LIGHTS_PIN.isPressed()) {
     mySimpit.printToKSP("Activate Lights!");
     mySimpit.activateAction(LIGHT_ACTION);
     digitalWrite(RED_LIGHTS_LED, LOW);
     digitalWrite(GREEN_LIGHTS_LED, HIGH);
   }
-  if(LIGHTS_PIN.isReleased()){
+  if(LIGHTS_PIN.isReleased()) {
     mySimpit.printToKSP("Deactivate Lights!");
     mySimpit.deactivateAction(LIGHT_ACTION);
     digitalWrite(RED_LIGHTS_LED, HIGH);
@@ -294,11 +344,49 @@ void loop() {
     digitalWrite(MAP_LED, LOW);
   }
 
+  if(RCS_PIN.isPressed()) {
+    mySimpit.printToKSP("Deactivate RCS!");
+    mySimpit.deactivateAction(RCS_ACTION);
+    digitalWrite(RED_RCS_LED, HIGH);
+    digitalWrite(GREEN_RCS_LED, LOW);
+  }
+
+  if(RCS_PIN.isReleased()) {
+    mySimpit.printToKSP("Activate RCS!");
+    mySimpit.activateAction(RCS_ACTION);
+    digitalWrite(RED_RCS_LED, LOW);
+    digitalWrite(GREEN_RCS_LED, HIGH);
+  }
+
+  if(SAS_PIN.isPressed()) {
+    mySimpit.printToKSP("Deactivate SAS!");
+    mySimpit.deactivateAction(SAS_ACTION);
+    digitalWrite(RED_SAS_LED, HIGH);
+    digitalWrite(GREEN_SAS_LED, LOW);
+  }
+
+  if(SAS_PIN.isReleased()) {
+    mySimpit.printToKSP("Activate SAS!");
+    mySimpit.activateAction(SAS_ACTION);
+    digitalWrite(RED_SAS_LED, LOW);
+    digitalWrite(GREEN_SAS_LED, HIGH);
+  }
+
+  if(CAM_VIEW_PIN.isPressed()) {
+    mySimpit.printToKSP("Switching camera views");
+    keyboardEmulatorMessage keyMsg(0x43);
+    mySimpit.send(KEYBOARD_EMULATOR,keyMsg);  
+  }
+
+  // ------------------------------------------------------------------------------
+
   //THROTTLE CONTROL
   throttleMessage throttle_msg;
   int throttleReading = analogRead(THROTTLE_PIN);
   throttle_msg.throttle = map(throttleReading, 0, 1023, 0, INT16_MAX);
   mySimpit.send(THROTTLE_MESSAGE, throttle_msg);
+
+  // ------------------------------------------------------------------------------
 
   //FLIGHT JOYSTICK CONTROL
   rotationMessage rot_msg;
@@ -321,16 +409,34 @@ void loop() {
   // Send the message
   mySimpit.send(ROTATION_MESSAGE, rot_msg);
 
-  //CAMERA JOYSTICK CONTROL
+  // ------------------------------------------------------------------------------
+
+  //CAMERA CONTROLS
   cameraRotationMessage camRot_msg;
+
+  //ZOOM CONTROLS
+  if(ZOOM_UP_PIN.isPressed()){
+    mySimpit.printToKSP("ZOOM UP!");
+    keyboardEmulatorMessage keyMsg(0x6B);
+    mySimpit.send(KEYBOARD_EMULATOR,keyMsg);    
+  }
+  
+  if(ZOOM_DOWN_PIN.isPressed()){
+    mySimpit.printToKSP("ZOOM DOWN!");
+    keyboardEmulatorMessage keyMsg(0x6D);
+    mySimpit.send(KEYBOARD_EMULATOR,keyMsg);    
+  }
+
   // Read the values of the potentiometers
   int cam_reading_pitch = analogRead(CAM_PITCH_PIN);
   int cam_reading_roll = analogRead(CAM_ROLL_PIN);
   int cam_reading_yaw = analogRead(CAM_YAW_PIN);
+
   // Check if they are in the deadzone, if not, set the values to a KSP Figure
+  
   // Pitch
   if (cam_reading_pitch < deadRangeLowPitch) {
-   camPitch = map(cam_reading_pitch, 0, deadRangeLowPitch, INT16_MIN, 0);
+    camPitch = map(cam_reading_pitch, 0, deadRangeLowPitch, INT16_MIN, 0);
   } else if (cam_reading_pitch > deadRangeHighPitch) {
     camPitch = map(cam_reading_pitch, deadRangeHighPitch , 1023, 0, INT16_MAX);
   } else {
@@ -356,9 +462,9 @@ void loop() {
   }
 
   //Adjust the sensitivity of the joystick here
-  camPitch = camPitch * 0.250;
+  camPitch = camPitch * 0.067;
   camRoll = camRoll * 1.0;
-  camYaw = camYaw * 0.25;
+  camYaw = camYaw * 0.067;
 
   //Inverts axis
   camYaw = camYaw * -1.0;
